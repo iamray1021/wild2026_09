@@ -1,26 +1,24 @@
 <!DOCTYPE html>
-<html lang="zh-TW" class="scroll-smooth">
+<html lang="zh-TW">
 <head>
-    <!-- Chosen Palette: Warm Coastal Sand & Ocean Harmony (Stone 50, Teal 600, Amber 500, Slate 700) -->
-    <!-- Application Structure Plan: Single Page Interactive Web App designed for the SOW Parent-Child Club (9/13 Jiugang Island Event). Sections include: 1. Hero & Highlights Dashboard, 2. Dynamic Activity Schedule (Filterable), 3. Station Explorer (Interactive Cards), 4. Team & Member Search Engine, 5. Interactive Gear Checklist with Progress Bar, and 6. Logistics & Emergency Contacts. Structured for maximum readability and ease of use on mobile devices during field events. -->
-    <!-- Visualization & Content Choices: Time distribution analyzed with Chart.js Donut Chart (Canvas); Search engine implemented in pure JS for zero-latency filter on 8 sub-teams; Dynamic state-based checklist to help parents pack equipment. NO SVG graphics or Mermaid JS used. -->
+    <!-- Chosen Palette: Sand & Coastal Emerald (主背景: #FAF9F6 溫暖沙灘白, 主色調: #166534 森林綠, 漸層與點綴: #0284C7 海洋藍 / #D97706 琥珀黃) -->
+    <!-- Application Structure Plan: 本單頁應用程式（SPA）旨在將「竹一小蜂團九月團集會行程」轉化為直覺、便於現場指引與行前準備的數位手冊。結構規劃為：1. 頂部導覽與重點資訊看板（活動主題、時間地點、緊急聯絡 quick-bar）；2. 互動式流程時間軸與時間分配圖表（方便隨時切換全天/上午/下午流程）；3. 闖關遊戲地圖卡片（清楚呈現關卡、場地與更新後的負責人狀態）；4. 淨灘分隊即時搜尋與團隊卡片（可輸入人名或隊別迅速查找隊員與導引員）；5. 個人裝備互動檢查清單（具備進度條與勾選功能）與公用器材表；6. 場域導航與緊急醫療備援。此結構脫離傳統表格的呆板，讓家長與志工皆能迅速找到所需資訊。 -->
+    <!-- Visualization & Content Choices: 
+         - 時間分配：採用 Chart.js 環狀圖（Canvas 繪製，無 SVG），呈現全天時間在闖關、淨灘、破冰與餐點的比重。
+         - 行程流程：使用動態頁籤過濾器（全天/上午/下午/淨灘），搭配時間軸視覺卡片。
+         - 人員分隊：使用 JavaScript 即時關鍵字搜尋與小隊篩選器，快速檢索小蜂與導引員。
+         - 裝備清單：使用互動式 HTML/JS Checkbox 結合進度條，提升家長整理裝備的便利度。
+         - 確認：全程無使用 SVG 標籤（使用 Unicode 與 CSS 視覺呈現），無使用 Mermaid JS。
+    -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9/13 舊港島團集會 - 小小海洋探險家與淨灘守護</title>
+    <title>荒野親子團 竹一小蜂團 九月團集會行程手冊</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #fafaf9; /* Stone 50 */
-        }
         .chart-container {
             position: relative;
             width: 100%;
@@ -28,602 +26,613 @@
             margin-left: auto;
             margin-right: auto;
             height: 280px;
-            max-height: 350px;
+            max-height: 320px;
         }
         @media (min-width: 768px) {
             .chart-container {
                 height: 320px;
             }
         }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen pb-20">
+<body class="bg-[#FAF9F6] text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-emerald-200 selection:text-emerald-900">
 
-    <!-- 頂部導覽列 -->
-    <nav class="sticky top-0 z-50 bg-teal-800 text-white shadow-md backdrop-blur-md bg-opacity-95">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <span class="text-2xl">🌾</span>
-                <span class="font-bold text-lg md:text-xl tracking-wide">荒野竹一小蜂團</span>
-            </div>
-            <div class="hidden md:flex space-x-6 text-sm font-medium">
-                <a href="#highlights" class="hover:text-amber-300 transition-colors">活動亮點</a>
-                <a href="#schedule" class="hover:text-amber-300 transition-colors">當日流程</a>
-                <a href="#stations" class="hover:text-amber-300 transition-colors">闖關探索</a>
-                <a href="#teams" class="hover:text-amber-300 transition-colors">小隊查詢</a>
-                <a href="#checklist" class="hover:text-amber-300 transition-colors">裝備清單</a>
-                <a href="#logistics" class="hover:text-amber-300 transition-colors">交通指引</a>
-            </div>
-            <a href="#schedule" class="md:hidden text-xs bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-1.5 rounded-full transition-all">
-                ⏱️ 看流程
-            </a>
-        </div>
-    </nav>
-
-    <!-- 主標題與 Hero Section -->
-    <header class="bg-gradient-to-b from-teal-800 via-teal-700 to-teal-600 text-white pt-10 pb-16 px-4 relative overflow-hidden">
-        <div class="max-w-4xl mx-auto text-center relative z-10">
-            <div class="inline-block bg-teal-900 bg-opacity-60 border border-teal-400/40 px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold mb-4 text-teal-200">
-                民國 115 年 9 月 13 日（日） 08:45 - 17:15
-            </div>
-            <h1 class="text-3xl md:text-5xl font-extrabold mb-4 tracking-tight leading-tight">
-                舊港島小小海洋探險家<br class="hidden sm:inline"><span class="text-amber-300">與淨灘守護之旅</span>
-            </h1>
-            <p class="text-teal-100 text-sm md:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
-                結合環境手作、濱海瀕危植物巡禮、地標尋寶與實地淨灘行動！讓我們攜手走進舊港島，用行動守護海洋與大自然。
-            </p>
-            
-            <!-- Quick Summary Badges -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto text-slate-800 text-xs md:text-sm font-bold">
-                <div class="bg-white/95 p-3 rounded-xl shadow-md border-b-4 border-teal-500">
-                    <span class="text-lg block mb-1">📍 集合地點</span>
-                    <span class="text-slate-600 font-normal">舊港島・島港豐巢</span>
-                </div>
-                <div class="bg-white/95 p-3 rounded-xl shadow-md border-b-4 border-amber-500">
-                    <span class="text-lg block mb-1">🧭 上午任務</span>
-                    <span class="text-slate-600 font-normal">豐巢四大闖關</span>
-                </div>
-                <div class="bg-white/95 p-3 rounded-xl shadow-md border-b-4 border-blue-500">
-                    <span class="text-lg block mb-1">🌊 下午行動</span>
-                    <span class="text-slate-600 font-normal">賞夕平台實地淨灘</span>
-                </div>
-                <div class="bg-white/95 p-3 rounded-xl shadow-md border-b-4 border-emerald-500">
-                    <span class="text-lg block mb-1">👟 穿著要求</span>
-                    <span class="text-slate-600 font-normal">藍T團服 + 包頭鞋</span>
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-emerald-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl">🌱</span>
+                <div>
+                    <h1 class="text-lg font-bold text-emerald-900 leading-tight">竹一小蜂團 2026年9月團集會</h1>
+                    <p class="text-xs text-slate-500">行履山海 守護自然 ｜ 小小海洋探險家</p>
                 </div>
             </div>
+            <nav class="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium text-slate-600">
+                <a href="#schedule" class="px-3 py-1.5 rounded-full hover:bg-emerald-50 hover:text-emerald-700 transition">行程時間軸</a>
+                <a href="#games" class="px-3 py-1.5 rounded-full hover:bg-emerald-50 hover:text-emerald-700 transition">闖關遊戲</a>
+                <a href="#teams" class="px-3 py-1.5 rounded-full hover:bg-emerald-50 hover:text-emerald-700 transition">淨灘分隊</a>
+                <a href="#checklist" class="px-3 py-1.5 rounded-full hover:bg-emerald-50 hover:text-emerald-700 transition">裝備清單</a>
+                <a href="#info" class="px-3 py-1.5 rounded-full hover:bg-emerald-50 hover:text-emerald-700 transition">注意事項&緊急聯絡</a>
+            </nav>
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 -mt-8 relative z-20 space-y-12">
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
 
-        <!-- 區塊 1: 活動亮點與時間比例 -->
-        <section id="highlights" class="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-stone-200/80">
-            <div class="border-b border-stone-200 pb-4 mb-6">
-                <h2 class="text-2xl font-bold text-slate-800 flex items-center">
-                    <span class="text-amber-500 mr-2">🌟</span> 活動三大亮點 & 時間配比
-                </h2>
-                <p class="text-stone-500 text-sm mt-1">
-                    本區塊幫助您快速了解當天學習重點與活動安排時間佔比。
+        <!-- Banner & Hero Section -->
+        <section class="bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+            <div class="relative z-10 max-w-3xl space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-emerald-100 text-xs font-semibold backdrop-blur-md">
+                    <span>📅 2026 / 09 / 13 (日)</span>
+                    <span>•</span>
+                    <span>📍 舊港島 島港豐巢</span>
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight">舊港島淨灘 ── 小小海洋探險家</h2>
+                <p class="text-emerald-100 text-sm sm:text-base leading-relaxed">
+                    本次活動結合三生教育（生活、生命、生態），上午透過精采的闖關探險認識舊港島，下午前往賞夕平台進行淨灘與 ICC 國際記錄統計，實踐「行履山海 守護自然」的精神！
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs sm:text-sm">
+                    <div class="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm border border-white/10">
+                        <span class="block text-emerald-200 text-xs">總召</span>
+                        <span class="font-bold text-white">黑潮</span>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm border border-white/10">
+                        <span class="block text-emerald-200 text-xs">育導</span>
+                        <span class="font-bold text-white">芭樂籽</span>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm border border-white/10">
+                        <span class="block text-emerald-200 text-xs">團長</span>
+                        <span class="font-bold text-white">水蒸氣</span>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm border border-white/10">
+                        <span class="block text-emerald-200 text-xs">活動時間</span>
+                        <span class="font-bold text-white">08:45 ~ 17:30</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Schedule & Time Analysis -->
+        <section id="schedule" class="space-y-4">
+            <div class="border-l-4 border-emerald-600 pl-4">
+                <h3 class="text-xl font-bold text-slate-800">📅 活動行程時間軸與時間分配</h3>
+                <p class="text-sm text-slate-600 mt-1">
+                    本區塊展示全天集會流程規劃。您可透過動態按鈕切換不同時段的活動內容，並右側可查看集會各項主題的時間比重分析，協助掌握整體節奏。
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                <!-- 三大亮點清單 -->
-                <div class="lg:col-span-7 space-y-4">
-                    <div class="p-4 rounded-xl bg-amber-50 border-l-4 border-amber-500 flex items-start space-x-3">
-                        <span class="text-2xl mt-0.5">🧩</span>
-                        <div>
-                            <h3 class="font-bold text-amber-900 text-base">1. 豐巢闖關大進擊（上午 120 分鐘）</h3>
-                            <p class="text-stone-700 text-sm mt-1 leading-relaxed">
-                                涵蓋手作海洋吊飾、瀕危植物觀察、舊港島歷史地標尋寶以及春不老迷宮卡牌對決，兼具知性與趣味。
-                            </p>
-                        </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                <!-- Timeline Controller & Display (2 Cols) -->
+                <div class="lg:col-span-2 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                    <!-- Filter Buttons -->
+                    <div class="flex flex-wrap gap-2 pb-3 border-b border-slate-100">
+                        <button onclick="filterSchedule('all')" id="btn-all" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow-sm transition">全天流程</button>
+                        <button onclick="filterSchedule('morning')" id="btn-morning" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🌅 上午 (08:45-12:00)</button>
+                        <button onclick="filterSchedule('afternoon')" id="btn-afternoon" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">🌊 下午 (13:00-17:30)</button>
                     </div>
 
-                    <div class="p-4 rounded-xl bg-teal-50 border-l-4 border-teal-600 flex items-start space-x-3">
-                        <span class="text-2xl mt-0.5">🤝</span>
-                        <div>
-                            <h3 class="font-bold text-teal-900 text-base">2. 蜂蟻併入鹿鷹大會師（下午 破冰互動）</h3>
-                            <p class="text-stone-700 text-sm mt-1 leading-relaxed">
-                                下午移師賞夕平台，小蜂與小蟻將打破隊伍界線，合併編入鹿、鷹大隊，培養跨組團隊合作精神。
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="p-4 rounded-xl bg-blue-50 border-l-4 border-blue-500 flex items-start space-x-3">
-                        <span class="text-2xl mt-0.5">🏖️</span>
-                        <div>
-                            <h3 class="font-bold text-blue-900 text-base">3. 守護海岸・實地淨灘（下午 海洋守護）</h3>
-                            <p class="text-stone-700 text-sm mt-1 leading-relaxed">
-                                接受海洋教育與安全宣導後，戴上手套踏上沙灘撿拾海廢，並進行 ICC 標準分類與統計秤重。
-                            </p>
-                        </div>
+                    <!-- Timeline Items Table/List -->
+                    <div id="schedule-container" class="space-y-3 max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
+                        <!-- JS injected schedule -->
                     </div>
                 </div>
 
-                <!-- Chart.js 圓餅圖 -->
-                <div class="lg:col-span-5 bg-stone-50 p-4 rounded-xl border border-stone-200 text-center">
-                    <h3 class="font-bold text-stone-700 text-sm mb-2">📊 當日活動時間分佈</h3>
+                <!-- Time Distribution Chart (1 Col) -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-base font-bold text-slate-800 mb-1">⏱️ 活動類別時間佔比</h4>
+                        <p class="text-xs text-slate-500 mb-4">掌握各主題活動的時間配置（總時長 525 分鐘）</p>
+                    </div>
                     <div class="chart-container">
-                        <canvas id="timeChart"></canvas>
+                        <canvas id="scheduleChart"></canvas>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 text-center">
+                        💡 淨灘與闖關為本次兩大重點，各佔約 2 小時。
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 區塊 2: 互動式流程時間表 -->
-        <section id="schedule" class="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-stone-200/80">
-            <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-stone-200 pb-4 mb-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800 flex items-center">
-                        <span class="text-teal-600 mr-2">📅</span> 當日詳細流程時間表
-                    </h2>
-                    <p class="text-stone-500 text-sm mt-1">可點擊下方按鈕切換時段篩選。</p>
-                </div>
-
-                <!-- 流程篩選按鈕 -->
-                <div class="flex space-x-2 mt-4 md:mt-0">
-                    <button onclick="filterSchedule('all')" id="btn-all" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-700 text-white transition-all shadow-sm">
-                        全天流程
-                    </button>
-                    <button onclick="filterSchedule('morning')" id="btn-morning" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-all">
-                        ☀️ 上午闖關
-                    </button>
-                    <button onclick="filterSchedule('afternoon')" id="btn-afternoon" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-all">
-                        🌊 下午淨灘
-                    </button>
-                </div>
-            </div>
-
-            <!-- 時間表清單容器 -->
-            <div class="space-y-3" id="schedule-container">
-                <!-- 由 JavaScript 動態生成卡片 -->
-            </div>
-        </section>
-
-        <!-- 區塊 3: 上午四大闖關介紹 -->
-        <section id="stations" class="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-stone-200/80">
-            <div class="border-b border-stone-200 pb-4 mb-6">
-                <h2 class="text-2xl font-bold text-slate-800 flex items-center">
-                    <span class="text-amber-500 mr-2">🧩</span> 上午「群蜂出任務」四大關卡
-                </h2>
-                <p class="text-stone-500 text-sm mt-1">
-                    時間：09:45 - 11:45（每關 20-30 分鐘，吹哨/搖鈴換關）。
+        <!-- Section 2: Station Games -->
+        <section id="games" class="space-y-4">
+            <div class="border-l-4 border-amber-500 pl-4">
+                <h3 class="text-xl font-bold text-slate-800">🧩 闖關遊戲規劃 (09:45 ~ 11:45)</h3>
+                <p class="text-sm text-slate-600 mt-1">
+                    上午於島港豐巢及周邊進行 120 分鐘的闖關活動。共有四大關卡，邀請小蜂們透過手作、植物巡禮、地標尋找與卡牌遊戲探索舊港島。
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- 關卡 1 -->
-                <div class="bg-stone-50 rounded-xl p-5 border border-stone-200 hover:border-teal-500 transition-all shadow-sm">
-                    <div class="flex justify-between items-start mb-3">
-                        <span class="bg-teal-100 text-teal-800 font-bold px-2.5 py-1 rounded-md text-xs">關卡 A</span>
-                        <span class="text-xs text-stone-500 font-medium">📍 島港豐巢 2F</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Game 1 -->
+                <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">第一關</span>
+                            <span class="text-xs text-slate-500">📍 豐巢 2F</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-800">海洋魔術師</h4>
+                        <p class="text-xs text-slate-600">主題：手作體驗與創意思考</p>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">🎨 海洋魔術師（手作體驗）</h3>
-                    <p class="text-xs text-stone-600 mb-3 bg-white p-2.5 rounded-lg border border-stone-200/60">
-                        <strong class="text-teal-700">目標：</strong> 認識新竹海岸線常見海洋廢棄物（漁網、浮球等）對生態的危害，並將清洗乾淨的海廢編織成「守護海洋祈福吊飾」。
-                    </p>
-                    <div class="text-xs text-stone-500">
-                        <strong>負責人：</strong> 水蒸氣 關主
-                    </div>
-                </div>
-
-                <!-- 關卡 2 -->
-                <div class="bg-stone-50 rounded-xl p-5 border border-stone-200 hover:border-emerald-500 transition-all shadow-sm">
-                    <div class="flex justify-between items-start mb-3">
-                        <span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-md text-xs">關卡 B</span>
-                        <span class="text-xs text-stone-500 font-medium">📍 周邊植物叢</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">🌿 島嶼綠色小精靈（植物巡禮）</h3>
-                    <p class="text-xs text-stone-600 mb-3 bg-white p-2.5 rounded-lg border border-stone-200/60">
-                        <strong class="text-emerald-700">目標：</strong> 實地觸摸與觀察舊港島周邊濱海植物（如黃槿、林投、海檬果），理解濱海植物抗風抗鹽的適應能力。
-                    </p>
-                    <div class="text-xs text-stone-500">
-                        <strong>負責人：</strong> 黑潮 / 導引員
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-slate-500">負責人：<strong class="text-emerald-700 font-semibold">水蒸氣</strong></span>
+                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">道具準備</span>
                     </div>
                 </div>
 
-                <!-- 關卡 3 -->
-                <div class="bg-stone-50 rounded-xl p-5 border border-stone-200 hover:border-amber-500 transition-all shadow-sm">
-                    <div class="flex justify-between items-start mb-3">
-                        <span class="bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-md text-xs">關卡 C</span>
-                        <span class="text-xs text-stone-500 font-medium">📍 舊港島步道</span>
+                <!-- Game 2 -->
+                <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">第二關</span>
+                            <span class="text-xs text-slate-500">📍 植物叢</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-800">島嶼綠色小精靈</h4>
+                        <p class="text-xs text-slate-600">主題：瀕危植物巡禮與自然觀察</p>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">🧭 舊港島探險家（地標尋找）</h3>
-                    <p class="text-xs text-stone-600 mb-3 bg-white p-2.5 rounded-lg border border-stone-200/60">
-                        <strong class="text-amber-700">目標：</strong> 手持地圖進行實地踏查，尋找舊港島特色招牌、舊海關遺址與百年老樹，完成團體擺拍任務印章。
-                    </p>
-                    <div class="text-xs text-stone-500">
-                        <strong>負責人：</strong> 黑潮 / 導引員
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-slate-500">負責人：<strong class="text-amber-700 font-semibold">待定</strong></span>
+                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">植物尋禮道具</span>
                     </div>
                 </div>
 
-                <!-- 關卡 4 -->
-                <div class="bg-stone-50 rounded-xl p-5 border border-stone-200 hover:border-purple-500 transition-all shadow-sm">
-                    <div class="flex justify-between items-start mb-3">
-                        <span class="bg-purple-100 text-purple-800 font-bold px-2.5 py-1 rounded-md text-xs">關卡 D</span>
-                        <span class="text-xs text-stone-500 font-medium">📍 舊港橋下空間</span>
+                <!-- Game 3 -->
+                <div class="bg-white rounded-2xl p-5 border border-teal-100 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-800">第三關</span>
+                            <span class="text-xs text-slate-500">📍 步道</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-800">舊港島探險家</h4>
+                        <p class="text-xs text-slate-600">主題：舊港島地標尋找與地圖導覽</p>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">🃏 春不老迷宮（卡牌遊戲）</h3>
-                    <p class="text-xs text-stone-600 mb-3 bg-white p-2.5 rounded-lg border border-stone-200/60">
-                        <strong class="text-purple-700">目標：</strong> 透過卡牌配對與危機翻牌，了解海洋生物食物鏈以及海廢對海洋動物的困境，並發想減塑對策。
-                    </p>
-                    <div class="text-xs text-stone-500">
-                        <strong>負責人：</strong> 黑犀牛 關主
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-slate-500">負責人：<strong class="text-amber-700 font-semibold">待定</strong></span>
+                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">地標尋找道具</span>
+                    </div>
+                </div>
+
+                <!-- Game 4 -->
+                <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">第四關</span>
+                            <span class="text-xs text-slate-500">📍 舊港橋下</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-800">春不老迷宮</h4>
+                        <p class="text-xs text-slate-600">主題：卡牌遊戲與團隊合作挑戰</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-slate-500">負責人：<strong class="text-amber-700 font-semibold">待定</strong></span>
+                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">春不老迷宮卡牌</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 區塊 4: 下午淨灘分隊快查 -->
-        <section id="teams" class="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-stone-200/80">
-            <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-stone-200 pb-4 mb-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800 flex items-center">
-                        <span class="text-blue-600 mr-2">👥</span> 9/13 下午淨灘分隊查詢
-                    </h2>
-                    <p class="text-stone-500 text-sm mt-1">請輸入自然名或夥伴姓名，迅速尋找您的所在小隊。</p>
-                </div>
-                
-                <!-- 搜尋輸入框 -->
-                <div class="mt-4 md:mt-0 relative w-full md:w-64">
-                    <input type="text" id="memberSearch" oninput="searchTeam()" placeholder="🔍 輸入名字或關鍵字..." 
-                           class="w-full px-4 py-2 border border-stone-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent">
-                </div>
+        <!-- Section 3: Team Roster -->
+        <section id="teams" class="space-y-4">
+            <div class="border-l-4 border-teal-600 pl-4">
+                <h3 class="text-xl font-bold text-slate-800">🦀 9/13 下午淨灘分隊名冊</h3>
+                <p class="text-sm text-slate-600 mt-1">
+                    下午淨灘將蜂蟻併入鹿鷹組別，分為 8 個小隊。您可以使用下方搜尋框快速輸入小蜂名、導引員名字，或依小蜂群選擇顯示。
+                </p>
             </div>
 
-            <!-- 分隊按鈕切換 -->
-            <div class="flex flex-wrap gap-2 mb-6" id="team-buttons">
-                <!-- JS 動態生成按鈕 -->
-            </div>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                <!-- Search & Filter Control Bar -->
+                <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                    <div class="relative w-full sm:w-80">
+                        <input type="text" id="teamSearchInput" onkeyup="renderTeams()" placeholder="🔍 搜尋人名 (如：角鴞, 黑潮, 麋鹿)..." class="w-full pl-3 pr-4 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                        <span class="text-xs font-semibold text-slate-500 whitespace-nowrap">群別過濾:</span>
+                        <button onclick="filterGroup('ALL')" id="grp-ALL" class="px-3 py-1 text-xs rounded-lg font-semibold bg-slate-800 text-white">全部 (8隊)</button>
+                        <button onclick="filterGroup('泥壺蜂')" id="grp-泥壺蜂" class="px-3 py-1 text-xs rounded-lg font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">泥壺蜂</button>
+                        <button onclick="filterGroup('虎頭蜂')" id="grp-虎頭蜂" class="px-3 py-1 text-xs rounded-lg font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">虎頭蜂</button>
+                        <button onclick="filterGroup('長腳蜂')" id="grp-長腳蜂" class="px-3 py-1 text-xs rounded-lg font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">長腳蜂</button>
+                        <button onclick="filterGroup('細腰蜂')" id="grp-細腰蜂" class="px-3 py-1 text-xs rounded-lg font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">細腰蜂</button>
+                    </div>
+                </div>
 
-            <!-- 小隊名單卡片展示 -->
-            <div id="team-display" class="bg-stone-50 rounded-xl p-5 border border-stone-200">
-                <!-- JS 動態渲染小隊細節 -->
+                <!-- Team Cards Grid -->
+                <div id="teams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+                    <!-- JS injected team cards -->
+                </div>
             </div>
         </section>
 
-        <!-- 區塊 5: 裝備檢查互動清單 -->
-        <section id="checklist" class="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-stone-200/80">
-            <div class="border-b border-stone-200 pb-4 mb-6">
-                <h2 class="text-2xl font-bold text-slate-800 flex items-center">
-                    <span class="text-amber-500 mr-2">🎒</span> 個人行前裝備互動檢查表
-                </h2>
-                <p class="text-stone-500 text-sm mt-1">出發前請一一勾選，確保裝備齊全無遺漏！</p>
+        <!-- Section 4: Checklist & Equipment -->
+        <section id="checklist" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Personal Packing Checklist -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                <div class="border-l-4 border-emerald-600 pl-3 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">🎒 個人裝備檢查表</h3>
+                        <p class="text-xs text-slate-500">出發前點清，勾選可儲存進度</p>
+                    </div>
+                    <span id="checkProgressText" class="text-xs font-bold px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full">0/14 完成</span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div id="checkProgressBar" class="bg-emerald-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <div id="personalChecklist" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                    <!-- JS Injected Items -->
+                </div>
             </div>
 
-            <!-- 完成進度條 -->
-            <div class="mb-6 bg-stone-100 p-4 rounded-xl border border-stone-200">
-                <div class="flex justify-between items-center text-xs md:text-sm font-bold text-stone-700 mb-2">
-                    <span>準備進度：</span>
-                    <span id="check-progress-text">0 / 12 項已完成 (0%)</span>
+            <!-- Group Equipment Inventory -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                <div class="border-l-4 border-amber-500 pl-3">
+                    <h3 class="text-lg font-bold text-slate-800">🛠️ 團體活動器材需求</h3>
+                    <p class="text-xs text-slate-500">團集會與闖關道具分配與負責人</p>
                 </div>
-                <div class="w-full bg-stone-200 h-3 rounded-full overflow-hidden">
-                    <div id="check-progress-bar" class="bg-teal-600 h-full transition-all duration-300 w-0"></div>
-                </div>
-            </div>
 
-            <!-- 裝備勾選清單網格 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="checklist-items">
-                <!-- JS 動態產生勾選項 -->
+                <div class="overflow-x-auto max-h-[340px] overflow-y-auto custom-scrollbar">
+                    <table class="w-full text-xs text-left text-slate-600">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-50 sticky top-0">
+                            <tr>
+                                <th class="px-3 py-2">品名</th>
+                                <th class="px-2 py-2 text-center">數量</th>
+                                <th class="px-3 py-2">負責人 / 備註</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr><td class="px-3 py-2 font-medium">簽到簿 / 名冊</td><td class="px-2 py-2 text-center">1</td><td class="px-3 py-2">文書</td></tr>
+                            <tr class="bg-slate-50/50"><td class="px-3 py-2 font-medium">麥克風 / 擴音設備 / 值星帶</td><td class="px-2 py-2 text-center">1</td><td class="px-3 py-2">團長</td></tr>
+                            <tr><td class="px-3 py-2 font-medium">團旗 / 小蜂之歌海報</td><td class="px-2 py-2 text-center">1</td><td class="px-3 py-2">團長</td></tr>
+                            <tr class="bg-slate-50/50"><td class="px-3 py-2 font-medium">四大規律海報</td><td class="px-2 py-2 text-center">1</td><td class="px-3 py-2">團長</td></tr>
+                            <tr><td class="px-3 py-2 font-medium">醫藥箱</td><td class="px-2 py-2 text-center">4</td><td class="px-3 py-2">各導引員</td></tr>
+                            <tr class="bg-slate-50/50"><td class="px-3 py-2 font-medium">文具包</td><td class="px-2 py-2 text-center">4</td><td class="px-3 py-2">各導引員</td></tr>
+                            <tr><td class="px-3 py-2 font-medium">闖關順序卡</td><td class="px-2 py-2 text-center">6</td><td class="px-3 py-2">黑潮</td></tr>
+                            <tr class="bg-slate-50/50"><td class="px-3 py-2 font-medium">手作道具 (關卡1)</td><td class="px-2 py-2 text-center">1</td><td class="px-3 py-2">水蒸氣</td></tr>
+                            <tr><td class="px-3 py-2 font-medium">春不老迷宮卡牌 (關卡4)</td><td class="px-2 py-2 text-center">1</td><td class="px-3 py-2">黑犀牛</td></tr>
+                            <tr class="bg-slate-50/50"><td class="px-3 py-2 font-medium">地標尋找道具 (關卡3)</td><td class="px-2 py-2 text-center">1</td><td class="px-3 py-2">黑潮</td></tr>
+                            <tr><td class="px-3 py-2 font-medium">植物尋禮道具 (關卡2)</td><td class="px-2 py-2 text-center">1</td><td class="px-3 py-2">黑潮</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
-        <!-- 區塊 6: 交通與緊急聯絡資訊 -->
-        <section id="logistics" class="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-stone-200/80">
-            <div class="border-b border-stone-200 pb-4 mb-6">
-                <h2 class="text-2xl font-bold text-slate-800 flex items-center">
-                    <span class="text-red-500 mr-2">🚗</span> 交通指引與緊急聯絡
-                </h2>
-                <p class="text-stone-500 text-sm mt-1">包含停車地圖導航、聯絡電話與周邊醫療資源。</p>
+        <!-- Section 5: Info, Safety & Emergency -->
+        <section id="info" class="space-y-6">
+            <div class="border-l-4 border-rose-500 pl-4">
+                <h3 class="text-xl font-bold text-slate-800">⚠️ 注意事項與緊急應變指引</h3>
+                <p class="text-sm text-slate-600 mt-1">
+                    請各家長與團員詳細閱讀戶外安全事項、交通導航地點與緊急聯絡窗口。
+                </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- 交通資訊 -->
-                <div class="space-y-4">
-                    <h3 class="font-bold text-slate-800 text-base flex items-center">
-                        <span class="mr-2">🧭</span> 交通與停車指引
-                    </h3>
-                    <ul class="space-y-2 text-stone-700 text-sm">
-                        <li class="bg-stone-50 p-3 rounded-lg border border-stone-200">
-                            <strong>集合地點：</strong> 港島豐巢前廣場
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Safety Rules Card -->
+                <div class="bg-amber-50/60 rounded-2xl p-5 border border-amber-200/60 space-y-3">
+                    <h4 class="font-bold text-amber-900 flex items-center gap-2">
+                        <span>🛡️</span> 安全與穿著規定
+                    </h4>
+                    <ul class="text-xs text-amber-900 space-y-2 leading-relaxed">
+                        <li class="flex items-start gap-1.5">
+                            <span class="font-bold text-amber-700">•</span>
+                            <span><strong>鞋子規定：</strong>沙灘易有尖刺物，務必穿<strong>包頭鞋或運動鞋/雨鞋</strong>，嚴禁涼鞋或拖鞋。</span>
                         </li>
-                        <li class="bg-stone-50 p-3 rounded-lg border border-stone-200">
-                            <strong>停車規則：</strong> 沿岸道路請順向靠右停放，保持路口暢通。
+                        <li class="flex items-start gap-1.5">
+                            <span class="font-bold text-amber-700">•</span>
+                            <span><strong>防曬防中暑：</strong>海邊無遮蔽，請佩戴帽子，隨時補充水分或電解質。</span>
                         </li>
-                        <li class="bg-amber-50 p-3 rounded-lg border border-amber-200 text-amber-900 text-xs leading-relaxed">
-                            ⚠️ <strong>溫馨提醒：</strong> 道路較為狹窄，請遵循工作人員引導並儘量單向通行維持交通順暢。
+                        <li class="flex items-start gap-1.5">
+                            <span class="font-bold text-amber-700">•</span>
+                            <span><strong>全程配戴手套：</strong>淨灘時請務必戴上防護手套以防刺傷。</span>
                         </li>
                     </ul>
-                    
-                    <a href="https://maps.app.goo.gl/TJ7sJUdRw8xnUQZSA" target="_blank" 
-                       class="inline-flex items-center justify-center w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md text-sm">
-                        📍開啟 Google 地圖導航
-                    </a>
                 </div>
 
-                <!-- 緊急聯絡電話與醫療診所 -->
-                <div class="space-y-4">
-                    <h3 class="font-bold text-slate-800 text-base flex items-center">
-                        <span class="mr-2">📞</span> 團幹部緊急聯絡
-                    </h3>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-stone-50 p-2.5 rounded-lg border border-stone-200">
-                            <span class="text-stone-500 block">團長</span>
-                            <span class="font-bold text-slate-800">水蒸氣</span>
-                            <a href="tel:0919246304" class="text-teal-700 block font-mono mt-0.5">0919-246-304</a>
-                        </div>
-                        <div class="bg-stone-50 p-2.5 rounded-lg border border-stone-200">
-                            <span class="text-stone-500 block">副團長</span>
-                            <span class="font-bold text-slate-800">極光</span>
-                            <span class="text-stone-400 block font-mono mt-0.5">專人聯繫</span>
-                        </div>
-                        <div class="bg-stone-50 p-2.5 rounded-lg border border-stone-200">
-                            <span class="text-stone-500 block">育成會副會長</span>
-                            <span class="font-bold text-slate-800">芭樂籽</span>
-                            <a href="tel:0935071206" class="text-teal-700 block font-mono mt-0.5">0935-071-206</a>
-                        </div>
-                        <div class="bg-stone-50 p-2.5 rounded-lg border border-stone-200">
-                            <span class="text-stone-500 block">總召</span>
-                            <span class="font-bold text-slate-800">黑潮</span>
-                            <a href="tel:0935719259" class="text-teal-700 block font-mono mt-0.5">0935-719-259</a>
-                        </div>
+                <!-- Emergency Contacts Card -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+                    <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                        <span>📞</span> 活動緊急聯絡人
+                    </h4>
+                    <div class="space-y-2 text-xs">
+                        <a href="tel:0919246304" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-emerald-50 transition border border-slate-100">
+                            <span>團長 (水蒸氣)</span>
+                            <span class="font-mono text-emerald-700 font-bold">0919-246-304</span>
+                        </a>
+                        <a href="tel:0920818033" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-emerald-50 transition border border-slate-100">
+                            <span>副團長 (極光)</span>
+                            <span class="font-mono text-emerald-700 font-bold">0920-818-033</span>
+                        </a>
+                        <a href="tel:0935071206" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-emerald-50 transition border border-slate-100">
+                            <span>育成會副會長 (芭樂籽)</span>
+                            <span class="font-mono text-emerald-700 font-bold">0935-071-206</span>
+                        </a>
+                        <a href="tel:0935719259" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-emerald-50 transition border border-slate-100">
+                            <span>總召 (黑潮)</span>
+                            <span class="font-mono text-emerald-700 font-bold">0935-719-259</span>
+                        </a>
                     </div>
+                </div>
 
-                    <h3 class="font-bold text-slate-800 text-xs text-stone-500 pt-2">🏥 鄰近醫療院所資訊</h3>
-                    <div class="text-xs text-stone-600 space-y-1 bg-stone-50 p-3 rounded-lg border border-stone-200">
-                        <p>• 國軍桃園總醫院新竹分院(813) (03)534-8181</p>
-                        <p>• 中國醫藥大學新竹附設醫院 (03)558-0558</p>
-                        <p>• 新竹臺大分院新竹醫院 (03)532-6151</p>
+                <!-- Hospitals Card -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+                    <h4 class="font-bold text-slate-800 flex items-center gap-2">
+                        <span>🏥</span> 鄰近醫療診所
+                    </h4>
+                    <div class="space-y-2 text-xs text-slate-600">
+                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                            <p class="font-bold text-slate-800">國軍桃園總醫院新竹分院 (813)</p>
+                            <p>新竹市北區武陵路3號 ｜ (03) 534-8181</p>
+                        </div>
+                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                            <p class="font-bold text-slate-800">中國醫藥大學新竹附設醫院</p>
+                            <p>新竹縣竹北市興隆路一段199號 ｜ (03) 558-0558</p>
+                        </div>
+                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                            <p class="font-bold text-slate-800">新竹臺大分院新竹醫院</p>
+                            <p>新竹市北區經國路一段442巷25號 ｜ (03) 532-6151</p>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Locations & Map Navigation Bar -->
+            <div class="bg-gradient-to-r from-teal-800 to-emerald-900 rounded-2xl p-5 text-white shadow-md space-y-3">
+                <h4 class="font-bold text-base flex items-center gap-2">
+                    <span>📍</span> 活動場域位置與導航按鈕
+                </h4>
+                <p class="text-xs text-teal-100 leading-relaxed">
+                    停車提醒：沿岸道路請順向靠右單向停車，維護道路順暢。
+                </p>
+                <div class="flex flex-wrap gap-3 pt-1">
+                    <a href="https://maps.app.goo.gl/TJ7sJUdRw8xnUQZSA" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-emerald-900 hover:bg-emerald-50 rounded-xl text-xs font-bold transition shadow-sm">
+                        🗺️ Google Map 導航點 (島港豐巢)
+                    </a>
+                    <a href="https://maps.app.goo.gl/XDBfLPq6qNgY6aHS9" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition backdrop-blur-sm border border-white/20">
+                        🏖️ 淨灘區地圖
+                    </a>
+                    <a href="https://maps.app.goo.gl/HnpWDeH3kbgV4mLU9" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition backdrop-blur-sm border border-white/20">
+                        🌉 休息站 (賞夕平台橋下)
+                    </a>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- 頁尾聲明 -->
-    <footer class="mt-16 text-center text-stone-400 text-xs py-8 border-t border-stone-200">
-        <p>荒野保護協會親子團 竹一炫蜂團 • 行履山海 守護自然</p>
-        <p class="mt-1">Designed for SOW Parent-Child Club • 2026.09.13</p>
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p>荒野親子團 竹一小蜂團 2026年9月團集會備忘手冊</p>
+            <p class="text-slate-500">保護海洋 • 三生教育 • 行履山海 守護自然</p>
+        </div>
     </footer>
 
-    <!-- JavaScript 邏輯控制區 -->
+    <!-- JavaScript Application Logic -->
     <script>
-        // ----------------------------------------------------
-        // 1. 活動時程資料 Array
-        // ----------------------------------------------------
+        // --- 1. SCHEDULE DATA ---
         const scheduleData = [
-            { time: "08:45 - 09:00", dur: "15分", title: "報到集合", desc: "大小蜂報到與人數清點、裝備檢查", leader: "值星官 / 導引員", venue: "島港豐巢", cat: "morning" },
-            { time: "09:00 - 09:15", dur: "15分", title: "整隊升旗", desc: "升旗典禮、高唱小蜂之歌與四大規律", leader: "團長 / 值星官", venue: "島港豐巢", cat: "morning" },
-            { time: "09:15 - 09:30", dur: "15分", title: "介紹場地", desc: "破冰活動與島港豐巢場地導覽介紹", leader: "值星 / 總召", venue: "島港豐巢", cat: "morning" },
-            { time: "09:30 - 09:45", dur: "15分", title: "遊戲介紹", desc: "說明闖關規則、分站導引與注意事項", leader: "值星 / 總召", venue: "島港豐巢", cat: "morning" },
-            { time: "09:45 - 11:45", dur: "120分", title: "闖關遊戲 (群蜂出任務)", desc: "1.海洋魔術師 2.島嶼綠色小精靈 3.舊港島探險家 4.春不老迷宮", leader: "水蒸氣 / 黑潮 / 黑犀牛", venue: "豐巢2F/植物叢/步道/橋下", cat: "morning" },
-            { time: "11:45 - 12:00", dur: "15分", title: "集合洗手", desc: "全體小蜂集合、洗手準備用餐", leader: "值星 / 總召", venue: "島港豐巢", cat: "morning" },
-            { time: "12:00 - 13:00", dur: "60分", title: "午餐休息", desc: "享用美味午餐與補充水分", leader: "值星 / 育導", venue: "島港豐巢", cat: "morning" },
-            { time: "13:00 - 13:30", dur: "30分", title: "整裝準備", desc: "整隊、裝水、防曬、上廁所與環境整理", leader: "值星 / 總召", venue: "島港豐巢", cat: "afternoon" },
-            { time: "13:30 - 13:45", dur: "15分", title: "合併分隊", desc: "蜂蟻併入鹿鷹大隊進行編組", leader: "小鹿 / 導引員", venue: "島港豐巢", cat: "afternoon" },
-            { time: "13:45 - 14:00", dur: "15分", title: "隊伍移動", desc: "全體秩序移動至賞夕平台", leader: "小鹿 / 導引員", venue: "賞夕平台", cat: "afternoon" },
-            { time: "14:00 - 14:45", dur: "45分", title: "破冰大會師", desc: "活動說明與團體破冰互動", leader: "小鹿 / 導引員", venue: "賞夕平台", cat: "afternoon" },
-            { time: "14:45 - 15:00", dur: "15分", title: "淨灘宣導", desc: "海洋教育、安全注意事項與 ICC 表說明", leader: "小鹿 / 導引員", venue: "賞夕平台", cat: "afternoon" },
-            { time: "15:00 - 15:30", dur: "30分", title: "實地淨灘", desc: "配戴手套分隊進行沙灘淨灘行動", leader: "小鹿 / 導引員", venue: "賞夕平台", cat: "afternoon" },
-            { time: "15:30 - 15:45", dur: "15分", title: "大合照", desc: "淨灘後全體成果合照紀錄", leader: "小鹿 / 導引員", venue: "賞夕平台", cat: "afternoon" },
-            { time: "15:45 - 16:00", dur: "15分", title: "分類秤重", desc: "垃圾分類、秤重統計 (ICC) 與工具回收", leader: "小鹿 / 導引員", venue: "賞夕平台", cat: "afternoon" },
-            { time: "16:00 - 16:15", dur: "15分", title: "垃圾集中", desc: "將所有清理出之垃圾集中指定區", leader: "小鹿 / 導引員", venue: "賞夕平台", cat: "afternoon" },
-            { time: "16:15 - 16:45", dur: "30分", title: "點心&小隊時間", desc: "享用點心、發放新家庭入團邀請函", leader: "值星 / 育導", venue: "賞夕平台", cat: "afternoon" },
-            { time: "16:45 - 17:00", dur: "15分", title: "大分享與慶生", desc: "團長時間談話、當月壽星慶生活動", leader: "團長 / 育導", venue: "賞夕平台", cat: "afternoon" },
-            { time: "17:00 - 17:15", dur: "15分", title: "環境復原", desc: "場地整理與環境復原清潔", leader: "值星官", venue: "賞夕平台", cat: "afternoon" },
-            { time: "17:15 ~", dur: "-", title: "謝天謝地賦歸", desc: "心得交流與謝天謝地歡喜賦歸", leader: "團長", venue: "賞夕平台", cat: "afternoon" }
+            { time: "08:45~09:00", min: 15, item: "報到集合", desc: "大小蜂報到清點人數", leader: "值星官/導引員", location: "島港豐巢", equipment: "荒野會旗 × 1", category: "morning" },
+            { time: "09:00~09:15", min: 15, item: "整隊、升旗", desc: "升旗、小蜂之歌", leader: "團長/值星官", location: "島港豐巢", equipment: "麥克風、音樂、海報", category: "morning" },
+            { time: "09:15~09:30", min: 15, item: "介紹場地", desc: "破冰 + 介紹島港豐巢", leader: "值星/總召", location: "島港豐巢", equipment: "麥克風", category: "morning" },
+            { time: "09:30~09:45", min: 15, item: "遊戲介紹", desc: "介紹遊戲與場地規則", leader: "值星/總召", location: "島港豐巢", equipment: "麥克風", category: "morning" },
+            { time: "09:45~11:45", min: 120, item: "闖關遊戲", desc: "1.海洋魔術師 2.島嶼綠色小精靈 3.舊港島探險家 4.春不老迷宮", leader: "水蒸氣 / 待定", location: "豐巢2F/植物叢/步道/橋下", equipment: "各關卡道具", category: "morning" },
+            { time: "11:45~12:00", min: 15, item: "集合洗手", desc: "全員集合 + 洗手準備用餐", leader: "值星/總召", location: "島港豐巢", equipment: "—", category: "morning" },
+            { time: "12:00~13:00", min: 60, item: "午餐時間", desc: "享用美味午餐與休息", leader: "值星/育導", location: "島港豐巢", equipment: "午餐、餐具", category: "lunch" },
+            { time: "13:00~13:30", min: 30, item: "整裝準備", desc: "整隊裝水 + 整理環境 + 防曬 + 上廁所", leader: "值星/總召", location: "島港豐巢", equipment: "麥克風", category: "afternoon" },
+            { time: "13:30~13:45", min: 15, item: "分隊", desc: "蜂蟻併入鹿鷹組別", leader: "小鹿/導引員", location: "島港豐巢", equipment: "—", category: "afternoon" },
+            { time: "13:45~14:00", min: 15, item: "移動", desc: "移動至賞夕平台", leader: "小鹿/導引員", location: "賞夕平台", equipment: "—", category: "afternoon" },
+            { time: "14:00~14:45", min: 45, item: "破冰活動", desc: "活動說明 + 破冰遊戲", leader: "小鹿/導引員", location: "賞夕平台", equipment: "—", category: "afternoon" },
+            { time: "14:45~15:00", min: 15, item: "淨灘說明", desc: "小鹿負責說明規範與安全重點", leader: "小鹿/導引員", location: "賞夕平台", equipment: "手套 + ICC表", category: "afternoon" },
+            { time: "15:00~15:30", min: 30, item: "淨灘活動", desc: "小鹿帶領進行海岸清潔", leader: "小鹿/導引員", location: "賞夕平台", equipment: "垃圾袋 + ICC表 + 夾子", category: "afternoon" },
+            { time: "15:30~15:45", min: 15, item: "合照留念", desc: "留下團集會美好回憶", leader: "小鹿/導引員", location: "賞夕平台", equipment: "—", category: "afternoon" },
+            { time: "15:45~16:00", min: 15, item: "分類秤重", desc: "海廢分類、秤重與統計", leader: "小鹿/導引員", location: "賞夕平台", equipment: "ICC統計表 + 磅秤", category: "afternoon" },
+            { time: "16:00~16:15", min: 15, item: "垃圾集中", desc: "將分類後垃圾集中至指定點", leader: "小鹿/導引員", location: "賞夕平台", equipment: "—", category: "afternoon" },
+            { time: "16:15~16:45", min: 30, item: "點心與小隊時間", desc: "享用點心 + 新家庭發發邀請函", leader: "值星/育導", location: "賞夕平台", equipment: "點心、邀請函", category: "afternoon" },
+            { time: "16:45~17:00", min: 15, item: "大分享與慶生", desc: "團長時間 + 當月壽星慶生", leader: "團長/育導", location: "賞夕平台", equipment: "生日蛋糕/禮品", category: "afternoon" },
+            { time: "17:00~17:15", min: 15, item: "整理環境", desc: "場地復原與收拾", leader: "值星官", location: "賞夕平台", equipment: "—", category: "afternoon" },
+            { time: "17:15~", min: 15, item: "謝天謝地結語", desc: "分享心得 + 謝天謝地圓滿結束", leader: "團長", location: "賞夕平台", equipment: "—", category: "afternoon" }
         ];
 
-        // 渲染時間表
-        function renderSchedule(filterCategory = 'all') {
-            const container = document.getElementById('schedule-container');
-            container.innerHTML = '';
+        // --- 2. TEAM ROSTER DATA ---
+        const teamData = [
+            { id: 1, subGroup: "泥壺蜂", guide1: "麋鹿", guide2: null, members: ["角鴞", "羊咩咩", "雷電雲", "紅隼", "黃金鼠"], photo: "蚊子", total: 7 },
+            { id: 2, subGroup: "泥壺蜂", guide1: "上弦月", guide2: "水鳥", members: ["龍涎香", "雞母蟲", "開心果", "河狸", "向日葵"], photo: null, total: 7 },
+            { id: 3, subGroup: "虎頭蜂", guide1: "超人", guide2: null, members: ["小梨子", "雪花", "北極狐", "葵瓜子", "海獺"], photo: "遠山", total: 7 },
+            { id: 4, subGroup: "虎頭蜂", guide1: "黑犀牛", guide2: "土撥鼠", members: ["小鸭", "鍬形蟲", "雪虎", "白貓", "小刺蝟"], photo: null, total: 7 },
+            { id: 5, subGroup: "長腳蜂", guide1: "奇異鳥", guide2: null, members: ["柚子", "抹香鯨", "流川", "虎斑", "迷你猴"], photo: "黑豹", total: 7 },
+            { id: 6, subGroup: "長腳蜂", guide1: "雪兔", guide2: "黑潮", members: ["小魚", "女", "白鷺絲", "望月砂", "O2"], photo: null, total: 7 },
+            { id: 7, subGroup: "細腰蜂", guide1: "貓頭鷹", guide2: null, members: ["健康猴", "竹節蟲", "小星星", "小隕石", "穿山甲"], photo: "蒲公英", total: 7 },
+            { id: 8, subGroup: "細腰蜂", guide1: "喜鵲", guide2: null, members: ["QQ", "神木", "鱷魚", "白鶴"], photo: null, total: 6 }
+        ];
 
-            const filteredData = scheduleData.filter(item => {
-                if (filterCategory === 'all') return true;
-                return item.cat === filterCategory;
+        // --- 3. PERSONAL PACKING ITEMS ---
+        const personalItems = [
+            { id: "p1", name: "團服 (穿藍T)", req: true },
+            { id: "p2", name: "背心", req: true },
+            { id: "p3", name: "荒野領巾", req: false },
+            { id: "p4", name: "帽子", req: true },
+            { id: "p5", name: "個人餐具 (碗筷)", req: true },
+            { id: "p6", name: "個人水壺", req: true },
+            { id: "p7", name: "隨身背包", req: true },
+            { id: "p8", name: "雨衣", req: true },
+            { id: "p9", name: "藥品 (防蚊液等)", req: true },
+            { id: "p10", name: "健保卡", req: true },
+            { id: "p11", name: "包頭鞋 (球鞋/雨鞋)", req: true },
+            { id: "p12", name: "手套 (淨灘用)", req: true },
+            { id: "p13", name: "衛生紙", req: true },
+            { id: "p14", name: "手帕 / 毛巾", req: true }
+        ];
+
+        // --- RENDER SCHEDULE ---
+        function filterSchedule(type) {
+            const container = document.getElementById("schedule-container");
+            container.innerHTML = "";
+
+            // Button styling reset
+            document.querySelectorAll("#btn-all, #btn-morning, #btn-afternoon").forEach(btn => {
+                btn.className = "px-4 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition";
+            });
+            document.getElementById(`btn-${type}`).className = "px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow-sm transition";
+
+            const filtered = scheduleData.filter(s => {
+                if (type === "morning") return s.category === "morning" || s.category === "lunch";
+                if (type === "afternoon") return s.category === "afternoon";
+                return true;
             });
 
-            filteredData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 rounded-xl bg-stone-50 border border-stone-200/80 hover:bg-stone-100 transition-all text-xs md:text-sm";
+            filtered.forEach(s => {
+                const card = document.createElement("div");
+                card.className = "p-3 rounded-xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs";
+                
                 card.innerHTML = `
-                    <div class="flex items-center space-x-3 mb-2 sm:mb-0">
-                        <span class="font-mono font-bold text-teal-800 bg-teal-100 px-2.5 py-1 rounded-md text-xs min-w-[110px] text-center">
-                            ${item.time}
-                        </span>
+                    <div class="flex items-start sm:items-center gap-3">
+                        <span class="px-2.5 py-1 bg-slate-100 font-mono font-bold text-slate-700 rounded-lg whitespace-nowrap">${s.time}</span>
                         <div>
-                            <h4 class="font-bold text-slate-800 text-sm md:text-base">${item.title} <span class="text-xs font-normal text-stone-500">(${item.dur})</span></h4>
-                            <p class="text-stone-600 text-xs mt-0.5">${item.desc}</p>
+                            <p class="font-bold text-slate-800 text-sm">${s.item} <span class="text-xs font-normal text-slate-500">(${s.min}分鐘)</span></p>
+                            <p class="text-slate-600 text-xs">${s.desc}</p>
                         </div>
                     </div>
-                    <div class="text-right text-xs text-stone-500 sm:min-w-[140px]">
-                        <div>👤 ${item.leader}</div>
-                        <div class="text-teal-700 font-medium">📍 ${item.venue}</div>
+                    <div class="flex flex-wrap items-center gap-2 text-slate-500 text-xs pt-1 sm:pt-0">
+                        <span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded">👤 ${s.leader}</span>
+                        <span class="bg-teal-50 text-teal-800 px-2 py-0.5 rounded">📍 ${s.location}</span>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function filterSchedule(cat) {
-            ['all', 'morning', 'afternoon'].forEach(c => {
-                const btn = document.getElementById(`btn-${c}`);
-                if (c === cat) {
-                    btn.className = "px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-700 text-white transition-all shadow-sm";
-                } else {
-                    btn.className = "px-3 py-1.5 text-xs font-bold rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-all";
-                }
+        // --- RENDER TEAMS ---
+        let currentGroupFilter = 'ALL';
+
+        function filterGroup(grp) {
+            currentGroupFilter = grp;
+            document.querySelectorAll("[id^='grp-']").forEach(btn => {
+                btn.className = "px-3 py-1 text-xs rounded-lg font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200";
             });
-            renderSchedule(cat);
+            document.getElementById(`grp-${grp}`).className = "px-3 py-1 text-xs rounded-lg font-semibold bg-slate-800 text-white";
+            renderTeams();
         }
 
-        // ----------------------------------------------------
-        // 2. 淨灘小隊資料 Array
-        // ----------------------------------------------------
-        const teamData = [
-            { id: 1, type: "泥", leader: "糜鹿", photo: "水鳥", members: ["角鴞", "羊咩咩", "雷電雲", "紅隼", "黃金鼠", "蚊子"], total: "11人" },
-            { id: 2, type: "虎", leader: "上弦月", photo: "土撥鼠", members: ["龍涎香", "雞母蟲", "開心果", "河浬", "向日葵", "遠山"], total: "12人" },
-            { id: 3, type: "長", leader: "超人", photo: "松雀鷹", members: ["小梨子", "雪花", "北極狐", "葵瓜子", "海獺", "黑豹"], total: "11人" },
-            { id: 4, type: "細", leader: "黑犀牛", photo: "黑潮", members: ["小鴨", "鍬形蟲", "雪虎", "白貓", "小刺蝟", "蒲公英"], total: "11人" },
-            { id: 5, type: "併組5", leader: "奇異鳥", photo: "-", members: ["柚子", "抹香鯨", "流川", "虎斑", "迷你猴"], total: "10人" },
-            { id: 6, type: "併組6", leader: "雪兔", photo: "-", members: ["小魚", "白鷺絲", "望月砂", "O2"], total: "11人" },
-            { id: 7, type: "併組7", leader: "貓頭鷹", photo: "-", members: ["健康猴", "竹節蟲", "小星星", "小隕石", "穿山甲"], total: "10人" },
-            { id: 8, type: "併組8", leader: "喜鵲", photo: "-", members: ["QQ", "神木", "鱷魚", "白鶴"], total: "8人" }
-        ];
+        function renderTeams() {
+            const grid = document.getElementById("teams-grid");
+            grid.innerHTML = "";
+            const searchVal = document.getElementById("teamSearchInput").value.trim().toLowerCase();
 
-        let currentActiveTeam = 1;
-
-        function renderTeamButtons() {
-            const btnContainer = document.getElementById('team-buttons');
-            btnContainer.innerHTML = '';
-            
             teamData.forEach(t => {
-                const btn = document.createElement('button');
-                btn.onclick = () => selectTeam(t.id);
-                btn.id = `team-btn-${t.id}`;
-                btn.className = `px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    t.id === currentActiveTeam 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
-                }`;
-                btn.innerText = `第 ${t.id} 隊 (${t.type})`;
-                btnContainer.appendChild(btn);
-            });
-        }
+                // Filter by group
+                if (currentGroupFilter !== 'ALL' && t.subGroup !== currentGroupFilter) return;
 
-        function selectTeam(teamId) {
-            currentActiveTeam = teamId;
-            renderTeamButtons();
-            const team = teamData.find(t => t.id === teamId);
-            const display = document.getElementById('team-display');
+                // Search matching logic
+                const guidesStr = [t.guide1, t.guide2].filter(Boolean).join(" ");
+                const membersStr = t.members.join(" ");
+                const photoStr = t.photo || "";
+                const fullText = `${t.id} ${t.subGroup} ${guidesStr} ${membersStr} ${photoStr}`.toLowerCase();
 
-            display.innerHTML = `
-                <div class="flex justify-between items-center mb-4 border-b border-stone-200 pb-3">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-800">第 ${team.id} 小隊 <span class="text-xs font-normal text-stone-500">(${team.type}隊)</span></h3>
-                        <p class="text-xs text-stone-500">隊伍總人數：${team.total}</p>
-                    </div>
-                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
-                        導引員：${team.leader}
-                    </span>
-                </div>
+                if (searchVal && !fullText.includes(searchVal)) return;
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div class="bg-white p-3 rounded-lg border border-stone-200">
-                        <span class="text-stone-400 block mb-1">● 導引員 / 攝影官</span>
-                        <div class="font-bold text-slate-800">導引員：${team.leader}</div>
-                        <div class="font-bold text-stone-600">攝影官：${team.photo}</div>
-                    </div>
+                const card = document.createElement("div");
+                card.className = "bg-slate-50/70 rounded-xl p-4 border border-slate-200 flex flex-col justify-between hover:bg-white hover:border-emerald-300 transition shadow-sm space-y-3";
 
-                    <div class="bg-white p-3 rounded-lg border border-stone-200">
-                        <span class="text-stone-400 block mb-1">● 隊員名單</span>
-                        <div class="flex flex-wrap gap-1.5">
-                            ${team.members.map(m => `<span class="bg-stone-100 text-stone-700 px-2 py-1 rounded border border-stone-200/80">${m}</span>`).join('')}
+                const guideBadges = `
+                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-xs font-semibold">1: ${t.guide1}</span>
+                    ${t.guide2 ? `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-xs font-semibold">2: ${t.guide2}</span>` : ''}
+                `;
+
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                            <span class="font-bold text-slate-800">第 ${t.id} 隊 <span class="text-xs font-normal text-slate-500">(${t.subGroup})</span></span>
+                            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">${t.total}人</span>
+                        </div>
+                        <div class="text-xs space-y-1">
+                            <p class="text-slate-500 font-semibold">導引員：</p>
+                            <div class="flex flex-wrap gap-1">${guideBadges}</div>
+                        </div>
+                        <div class="text-xs space-y-1 pt-1">
+                            <p class="text-slate-500 font-semibold">隊員：</p>
+                            <div class="flex flex-wrap gap-1">
+                                ${t.members.map(m => `<span class="px-2 py-0.5 bg-white border border-slate-200 rounded text-slate-700">${m}</span>`).join('')}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }
+                    ${t.photo ? `<div class="pt-2 border-t border-slate-200 text-xs text-slate-500">📸 攝影官：<strong class="text-slate-700">${t.photo}</strong></div>` : '<div class="pt-2 border-t border-slate-200 text-xs text-slate-400">📸 攝影官：無</div>'}
+                `;
+                grid.appendChild(card);
+            });
 
-        function searchTeam() {
-            const keyword = document.getElementById('memberSearch').value.trim();
-            if (!keyword) return;
-
-            const found = teamData.find(t => 
-                t.leader.includes(keyword) || 
-                t.photo.includes(keyword) || 
-                t.members.some(m => m.includes(keyword)) ||
-                t.type.includes(keyword) ||
-                `第${t.id}隊`.includes(keyword)
-            );
-
-            if (found) {
-                selectTeam(found.id);
+            if (grid.children.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 text-xs">查無符合條件的隊伍或成員，請重新輸入關鍵字。</div>`;
             }
         }
 
-        // ----------------------------------------------------
-        // 3. 裝備檢查清單 Logic
-        // ----------------------------------------------------
-        const checklistData = [
-            { id: "item-1", name: "藍 T 團服", category: "服裝" },
-            { id: "item-2", name: "荒野背心", category: "服裝" },
-            { id: "item-3", name: "荒野帽子", category: "服裝" },
-            { id: "item-4", name: "包頭鞋 (球鞋/雨鞋)", category: "服裝" },
-            { id: "item-5", name: "淨灘專用手套", category: "必備" },
-            { id: "item-6", name: "個人環保餐具 (碗筷)", category: "必備" },
-            { id: "item-7", name: "個人水壺", category: "必備" },
-            { id: "item-8", name: "隨身背包", category: "必備" },
-            { id: "item-9", name: "雨衣", category: "備用" },
-            { id: "item-10", name: "個人藥品 (防蚊液)", category: "備用" },
-            { id: "item-11", name: "健保卡", category: "隨身" },
-            { id: "item-12", name: "衛生紙 / 毛巾", category: "隨身" }
-        ];
-
-        let checkedState = JSON.parse(localStorage.getItem('sow_checklist_state') || '{}');
-
+        // --- CHECKLIST STATE & RENDER ---
         function renderChecklist() {
-            const container = document.getElementById('checklist-items');
-            container.innerHTML = '';
+            const container = document.getElementById("personalChecklist");
+            container.innerHTML = "";
 
+            const savedState = JSON.parse(localStorage.getItem("bee_pack_check") || "{}");
             let checkedCount = 0;
 
-            checklistData.forEach(item => {
-                const isChecked = !!checkedState[item.id];
+            personalItems.forEach(item => {
+                const isChecked = !!savedState[item.id];
                 if (isChecked) checkedCount++;
 
-                const div = document.createElement('div');
-                div.className = `p-3 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
-                    isChecked ? 'bg-teal-50 border-teal-300 text-teal-900' : 'bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100'
-                }`;
-                div.onclick = () => toggleCheck(item.id);
-
-                div.innerHTML = `
-                    <div class="flex items-center space-x-2.5">
-                        <input type="checkbox" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-teal-600 rounded focus:ring-teal-500">
-                        <span class="text-xs font-bold ${isChecked ? 'line-through text-teal-700' : ''}">${item.name}</span>
-                    </div>
-                    <span class="text-[10px] px-2 py-0.5 rounded ${isChecked ? 'bg-teal-200 text-teal-800' : 'bg-stone-200 text-stone-600'}">
-                        ${item.category}
-                    </span>
+                const label = document.createElement("label");
+                label.className = `flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer select-none transition ${isChecked ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}`;
+                
+                label.innerHTML = `
+                    <input type="checkbox" onchange="toggleCheck('${item.id}')" ${isChecked ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
+                    <span class="flex-grow">${item.name}</span>
+                    ${item.req ? '<span class="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">必帶</span>' : ''}
                 `;
-                container.appendChild(div);
+                container.appendChild(label);
             });
 
-            // 更新進度條
-            const percent = Math.round((checkedCount / checklistData.length) * 100);
-            document.getElementById('check-progress-text').innerText = `${checkedCount} / ${checklistData.length} 項已完成 (${percent}%)`;
-            document.getElementById('check-progress-bar').style.width = `${percent}%`;
+            // Update progress
+            const total = personalItems.length;
+            const pct = Math.round((checkedCount / total) * 100);
+            document.getElementById("checkProgressText").innerText = `${checkedCount}/${total} 完成 (${pct}%)`;
+            document.getElementById("checkProgressBar").style.width = `${pct}%`;
         }
 
         function toggleCheck(id) {
-            checkedState[id] = !checkedState[id];
-            localStorage.setItem('sow_checklist_state', JSON.stringify(checkedState));
+            const savedState = JSON.parse(localStorage.getItem("bee_pack_check") || "{}");
+            savedState[id] = !savedState[id];
+            localStorage.setItem("bee_pack_check", JSON.stringify(savedState));
             renderChecklist();
         }
 
-        // ----------------------------------------------------
-        // 4. Chart.js 初始化
-        // ----------------------------------------------------
+        // --- CHART INITIALIZATION (CHART.JS - CANVAS ONLY, NO SVG) ---
         function initChart() {
-            const ctx = document.getElementById('timeChart').getContext('2d');
+            const ctx = document.getElementById('scheduleChart').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['闖關遊戲(手作/巡禮/地標)', '實地淨灘與宣導', '整隊/破冰/大會師', '午餐與休息整裝', '點心分享與慶生', '報到升旗'],
+                    labels: ['闖關遊戲 (120分)', '淨灘與整理 (120分)', '破冰與流程 (105分)', '午餐與點心 (90分)', '整裝移動 (90分)'],
                     datasets: [{
-                        data: [120, 90, 45, 90, 60, 45],
+                        data: [120, 120, 105, 90, 90],
                         backgroundColor: [
-                            '#d97706', // Amber 600
-                            '#2563eb', // Blue 600
-                            '#0d9488', // Teal 600
-                            '#f59e0b', // Amber 500
-                            '#10b981', // Emerald 500
-                            '#64748b'  // Slate 500
+                            '#059669', // Emerald
+                            '#0284c7', // Sky
+                            '#f59e0b', // Amber
+                            '#10b981', // Teal
+                            '#64748b'  // Slate
                         ],
                         borderWidth: 2,
                         borderColor: '#ffffff'
@@ -636,8 +645,9 @@
                         legend: {
                             position: 'bottom',
                             labels: {
+                                boxWidth: 12,
                                 font: { size: 11 },
-                                boxWidth: 12
+                                padding: 10
                             }
                         },
                         tooltip: {
@@ -652,11 +662,10 @@
             });
         }
 
-        // 頁面載入後初始化
-        window.addEventListener('DOMContentLoaded', () => {
-            renderSchedule('all');
-            renderTeamButtons();
-            selectTeam(1);
+        // --- INITIALIZE ON DOM READY ---
+        document.addEventListener("DOMContentLoaded", () => {
+            filterSchedule('all');
+            renderTeams();
             renderChecklist();
             initChart();
         });
