@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <!-- Chosen Palette: Sand & Coastal Emerald (主背景: #FAF9F6 溫暖沙灘白, 主色調: #166534 森林綠, 漸層與點綴: #0284C7 海洋藍 / #D97706 琥珀黃) -->
-    <!-- Application Structure Plan: 本單頁應用程式（SPA）旨在將「竹一小蜂團九月團集會行程」轉化為直覺、便於現場指引與行前準備的數位手冊。結構規劃為：1. 頂部導覽與重點資訊看板（活動主題、時間地點、緊急聯絡 quick-bar）；2. 互動式流程時間軸與時間分配圖表（方便隨時切換全天/上午/下午流程）；3. 闖關遊戲地圖卡片（清楚呈現關卡、場地與更新後的負責人狀態）；4. 淨灘分隊即時搜尋與團隊卡片（可輸入人名或隊別迅速查找隊員與導引員）；5. 個人裝備互動檢查清單（具備進度條與勾選功能）與公用器材表；6. 場域導航與緊急醫療備援。此結構脫離傳統表格的呆板，讓家長與志工皆能迅速找到所需資訊。 -->
+    <!-- Application Structure Plan: 本單頁應用程式（SPA）旨在將「竹一小蜂團九月團集會行程」轉化為直覺、便於現場指引與行前準備的數位手冊。結構規劃為：1. 頂部導覽與重點資訊看板（活動主題、時間地點、緊急聯絡 quick-bar）；2. 互動式流程時間軸與時間分配圖表（方便隨時切換全天/上午/下午流程）；3. 闖關遊戲地圖卡片（清楚呈現關卡、場地與更新後的負責人狀態）；4. 淨灘分隊即時搜尋與團隊卡片（可輸入人名或隊別迅速查找隊員與導引員）；5. 個人裝備互動檢查清單（具備進度條與勾選功能）與公用器材表；6. 場域導航與緊急醫療備援。 -->
     <!-- Visualization & Content Choices: 
          - 時間分配：採用 Chart.js 環狀圖（Canvas 繪製，無 SVG），呈現全天時間在闖關、淨灘、破冰與餐點的比重。
          - 行程流程：使用動態頁籤過濾器（全天/上午/下午/淨灘），搭配時間軸視覺卡片。
@@ -94,7 +94,7 @@
                     </div>
                     <div class="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm border border-white/10">
                         <span class="block text-emerald-200 text-xs">育導</span>
-                        <span class="font-bold text-white">芭樂籽</span>
+                        <span class="font-bold text-white">飛天龍</span>
                     </div>
                     <div class="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm border border-white/10">
                         <span class="block text-emerald-200 text-xs">團長</span>
@@ -171,7 +171,7 @@
                     </div>
                     <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
                         <span class="text-slate-500">負責人：<strong class="text-emerald-700 font-semibold">水蒸氣</strong></span>
-                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">道具準備</span>
+                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">手作道具</span>
                     </div>
                 </div>
 
@@ -359,7 +359,7 @@
                             <span class="font-mono text-emerald-700 font-bold">0920-818-033</span>
                         </a>
                         <a href="tel:0935071206" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-emerald-50 transition border border-slate-100">
-                            <span>育成會副會長 (芭樂籽)</span>
+                            <span>育成會副會長 (飛天龍)</span>
                             <span class="font-mono text-emerald-700 font-bold">0935-071-206</span>
                         </a>
                         <a href="tel:0935719259" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-emerald-50 transition border border-slate-100">
@@ -433,7 +433,7 @@
             { time: "09:30~09:45", min: 15, item: "遊戲介紹", desc: "介紹遊戲與場地規則", leader: "值星/總召", location: "島港豐巢", equipment: "麥克風", category: "morning" },
             { time: "09:45~11:45", min: 120, item: "闖關遊戲", desc: "1.海洋魔術師 2.島嶼綠色小精靈 3.舊港島探險家 4.春不老迷宮", leader: "水蒸氣 / 待定", location: "豐巢2F/植物叢/步道/橋下", equipment: "各關卡道具", category: "morning" },
             { time: "11:45~12:00", min: 15, item: "集合洗手", desc: "全員集合 + 洗手準備用餐", leader: "值星/總召", location: "島港豐巢", equipment: "—", category: "morning" },
-            { time: "12:00~13:00", min: 60, item: "午餐時間", desc: "享用美味午餐與休息", leader: "值星/育導", location: "島港豐巢", equipment: "午餐、餐具", category: "lunch" },
+            { time: "12:00~13:00", min: 60, item: "午餐時間", desc: "享用美味午餐與休息", leader: "值星/飛天龍", location: "島港豐巢", equipment: "午餐、餐具", category: "lunch" },
             { time: "13:00~13:30", min: 30, item: "整裝準備", desc: "整隊裝水 + 整理環境 + 防曬 + 上廁所", leader: "值星/總召", location: "島港豐巢", equipment: "麥克風", category: "afternoon" },
             { time: "13:30~13:45", min: 15, item: "分隊", desc: "蜂蟻併入鹿鷹組別", leader: "小鹿/導引員", location: "島港豐巢", equipment: "—", category: "afternoon" },
             { time: "13:45~14:00", min: 15, item: "移動", desc: "移動至賞夕平台", leader: "小鹿/導引員", location: "賞夕平台", equipment: "—", category: "afternoon" },
@@ -443,8 +443,8 @@
             { time: "15:30~15:45", min: 15, item: "合照留念", desc: "留下團集會美好回憶", leader: "小鹿/導引員", location: "賞夕平台", equipment: "—", category: "afternoon" },
             { time: "15:45~16:00", min: 15, item: "分類秤重", desc: "海廢分類、秤重與統計", leader: "小鹿/導引員", location: "賞夕平台", equipment: "ICC統計表 + 磅秤", category: "afternoon" },
             { time: "16:00~16:15", min: 15, item: "垃圾集中", desc: "將分類後垃圾集中至指定點", leader: "小鹿/導引員", location: "賞夕平台", equipment: "—", category: "afternoon" },
-            { time: "16:15~16:45", min: 30, item: "點心與小隊時間", desc: "享用點心 + 新家庭發發邀請函", leader: "值星/育導", location: "賞夕平台", equipment: "點心、邀請函", category: "afternoon" },
-            { time: "16:45~17:00", min: 15, item: "大分享與慶生", desc: "團長時間 + 當月壽星慶生", leader: "團長/育導", location: "賞夕平台", equipment: "生日蛋糕/禮品", category: "afternoon" },
+            { time: "16:15~16:45", min: 30, item: "點心與小隊時間", desc: "享用點心 + 新家庭發發邀請函", leader: "值星/飛天龍", location: "賞夕平台", equipment: "點心、邀請函", category: "afternoon" },
+            { time: "16:45~17:00", min: 15, item: "大分享與慶生", desc: "團長時間 + 當月壽星慶生", leader: "團長/飛天龍", location: "賞夕平台", equipment: "生日蛋糕/禮品", category: "afternoon" },
             { time: "17:00~17:15", min: 15, item: "整理環境", desc: "場地復原與收拾", leader: "值星官", location: "賞夕平台", equipment: "—", category: "afternoon" },
             { time: "17:15~", min: 15, item: "謝天謝地結語", desc: "分享心得 + 謝天謝地圓滿結束", leader: "團長", location: "賞夕平台", equipment: "—", category: "afternoon" }
         ];
@@ -454,7 +454,7 @@
             { id: 1, subGroup: "泥壺蜂", guide1: "麋鹿", guide2: null, members: ["角鴞", "羊咩咩", "雷電雲", "紅隼", "黃金鼠"], photo: "蚊子", total: 7 },
             { id: 2, subGroup: "泥壺蜂", guide1: "上弦月", guide2: "水鳥", members: ["龍涎香", "雞母蟲", "開心果", "河狸", "向日葵"], photo: null, total: 7 },
             { id: 3, subGroup: "虎頭蜂", guide1: "超人", guide2: null, members: ["小梨子", "雪花", "北極狐", "葵瓜子", "海獺"], photo: "遠山", total: 7 },
-            { id: 4, subGroup: "虎頭蜂", guide1: "黑犀牛", guide2: "土撥鼠", members: ["小鸭", "鍬形蟲", "雪虎", "白貓", "小刺蝟"], photo: null, total: 7 },
+            { id: 4, subGroup: "虎頭蜂", guide1: "黑犀牛", guide2: "土撥鼠", members: ["小鴨", "鍬形蟲", "雪虎", "白貓", "小刺蝟"], photo: null, total: 7 },
             { id: 5, subGroup: "長腳蜂", guide1: "奇異鳥", guide2: null, members: ["柚子", "抹香鯨", "流川", "虎斑", "迷你猴"], photo: "黑豹", total: 7 },
             { id: 6, subGroup: "長腳蜂", guide1: "雪兔", guide2: "黑潮", members: ["小魚", "女", "白鷺絲", "望月砂", "O2"], photo: null, total: 7 },
             { id: 7, subGroup: "細腰蜂", guide1: "貓頭鷹", guide2: null, members: ["健康猴", "竹節蟲", "小星星", "小隕石", "穿山甲"], photo: "蒲公英", total: 7 },
